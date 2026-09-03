@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transfer Matrix Reshaper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="board">
+
+  <header class="board__header">
+    <h1>Transfer Matrix Reshaper</h1>
+    <p class="board__tagline">Turn a connection matrix — inbound flights across, outbound flights down — into one clean block per inbound flight, ready to hand to the ramp.</p>
+  </header>
+
+  <!-- Step 1: upload -->
+  <section class="panel" id="dropzone" tabindex="0" role="button" aria-label="Choose a workbook to upload">
+    <input type="file" id="fileInput" accept=".xlsx,.xlsm" hidden>
+    <div class="dropzone__body" id="dropzoneBody">
+      <svg class="dropzone__icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M24 6v24M24 6l-8 8M24 6l8 8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8 32v6a4 4 0 0 0 4 4h24a4 4 0 0 0 4-4v-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p class="dropzone__primary">Drop a TRANSFER MATRIX workbook here, or click to browse</p>
+      <p class="dropzone__secondary">.xlsx or .xlsm, up to 25 MB</p>
+    </div>
+  </section>
+
+  <!-- Step 2: config, hidden until a file is read -->
+  <section class="panel panel--config" id="configPanel" hidden>
+
+    <div class="file-chip" id="fileChip">
+      <span class="file-chip__name" id="fileName"></span>
+      <button type="button" class="file-chip__clear" id="clearFile" aria-label="Remove this file">Remove</button>
+    </div>
+
+    <div class="field-row" id="sheetRow">
+      <label class="field-label" for="sheetSelect">Sheet</label>
+      <select id="sheetSelect" class="select"></select>
+    </div>
+
+    <div class="field-row" id="blockRow" hidden>
+      <label class="field-label" for="blockSelect">Matrix block</label>
+      <select id="blockSelect" class="select"></select>
+    </div>
+
+    <p class="block-meta" id="blockMeta"></p>
+
+    <div class="field-row">
+      <span class="field-label">Destination order</span>
+      <div class="segmented" role="radiogroup" aria-label="Destination order">
+        <button type="button" class="segmented__option is-active" data-sort="departure" role="radio" aria-checked="true">Departure time</button>
+        <button type="button" class="segmented__option" data-sort="count" role="radio" aria-checked="false">Transfer count</button>
+      </div>
+    </div>
+
+    <div class="field-row field-row--split">
+      <div>
+        <label class="field-label" for="minSta">STA from</label>
+        <input type="time" id="minSta" class="time-input">
+      </div>
+      <div>
+        <label class="field-label" for="maxSta">STA to</label>
+        <input type="time" id="maxSta" class="time-input">
+      </div>
+    </div>
+    <p class="field-hint" id="staHint">Leave blank to include every inbound flight in the block.</p>
+
+    <div class="field-row">
+      <div class="field-label-row">
+        <span class="field-label">Outbound destinations</span>
+        <button type="button" class="text-btn" id="chipsClear">Include all</button>
+      </div>
+      <div class="chips" id="outboundChips" aria-label="Filter outbound destinations"></div>
+      <p class="field-hint">Leave none selected to include every destination in the block.</p>
+    </div>
+
+    <label class="checkbox-row">
+      <input type="checkbox" id="allBlocksCheck">
+      <span>Process every matrix block on every sheet in this workbook</span>
+    </label>
+
+    <button type="button" class="generate-btn" id="generateBtn">Generate modified matrix</button>
+
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <footer class="board__footer">
+    <p>Nothing you upload is kept. Each file is read into memory, reshaped, and discarded the moment your download starts — no copies are stored on this server.</p>
+  </footer>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
