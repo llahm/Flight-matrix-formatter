@@ -40,14 +40,3 @@ generated output both live only for the lifetime of that one request; nothing
 is written to any permanent location on the server, and nothing accumulates
 across uploads. The frontend never stores your file anywhere either — it
 just re-sends the same in-browser `File` object each time you submit.
-
-## Notes / things you may want to tweak
-
-- `MAX_CONTENT_LENGTH` in `app.py` caps uploads at 25 MB — raise it if your
-  workbooks are bigger.
-- The dev server (`python3 app.py`) is fine for local/internal use. For
-  anything beyond that, run it behind a real WSGI server (gunicorn, etc.)
-  and turn `debug=False` (already the default here).
-- `build_modified_matrix.py` is untouched from what you gave me — if you
-  change its logic (new columns, different layout, etc.), the app picks it
-  up automatically since it just imports from that file.
