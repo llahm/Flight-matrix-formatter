@@ -193,6 +193,24 @@ def generate_modified_matrix(
         except (TypeError, ValueError):
             return 0
 
+    def _needs_white_text(fill):
+        """True only if fill is black (or effectively black) - other dark
+        colors (red, navy, etc.) keep the default text as before."""
+        try:
+            color = fill.fgColor
+            if color is None or color.type != "rgb":
+                return False
+            argb = color.rgb
+            if not argb or len(argb) < 6:
+                return False
+            hex6 = argb[-6:]
+            r = int(hex6[0:2], 16)
+            g = int(hex6[2:4], 16)
+            b = int(hex6[4:6], 16)
+            return r < 40 and g < 40 and b < 40
+        except (AttributeError, ValueError):
+            return False
+
     for f in incoming:
         pairs = []
         for o in outbound:
@@ -214,6 +232,7 @@ def generate_modified_matrix(
 
     bold = Font(name=FONT_NAME, bold=True)
     normal = Font(name=FONT_NAME)
+    normal_white = Font(name=FONT_NAME, color="FFFFFFFF")
 
     if title:
         out_ws.cell(row=1, column=1, value=f"MODIFIED MATRIX - {title}").font = bold
@@ -241,9 +260,7 @@ def generate_modified_matrix(
         r = DATA_START_ROW
         for dest, cnt, fill in f["pairs"]:
             dest_cell = out_ws.cell(row=r, column=dest_col, value=dest)
-            dest_cell.font = normal
             cell = out_ws.cell(row=r, column=cnt_col, value=numeric_value(cnt))
-            cell.font = normal
             if isinstance(cnt, str) and "*" in cnt:
                 cell.comment = openpyxl.comments.Comment(
                     f"Source cell read '{cnt}'; value shown is the product.",
@@ -252,10 +269,17 @@ def generate_modified_matrix(
             # Carry over the source cell's highlight color - it encodes
             # something meaningful (e.g. a tight/urgent connection), so the
             # reshaped sheet needs to keep showing it, on both cells of the
-            # pair so the whole row reads as highlighted.
+            # pair so the whole row reads as highlighted. If that fill is
+            # dark, switch the text to white so it stays readable instead
+            # of needing a manual fix.
+            row_font = normal
             if fill is not None and fill.fill_type is not None:
                 dest_cell.fill = copy(fill)
                 cell.fill = copy(fill)
+                if _needs_white_text(fill):
+                    row_font = normal_white
+            dest_cell.font = row_font
+            cell.font = row_font
             r += 1
 
         # Real formula total for THIS flight's own block only
