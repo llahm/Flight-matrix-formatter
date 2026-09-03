@@ -216,8 +216,3 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
-
-./app.py
-./build_modified_matrix.py
-
-./static/

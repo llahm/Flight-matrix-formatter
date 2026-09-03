@@ -23,6 +23,7 @@ several sheets (dates).
 import sys
 import argparse
 import datetime
+from copy import copy
 import openpyxl
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
@@ -195,15 +196,16 @@ def generate_modified_matrix(
     for f in incoming:
         pairs = []
         for o in outbound:
-            val = ws.cell(row=o["row"], column=f["col"]).value
+            cell = ws.cell(row=o["row"], column=f["col"])
+            val = cell.value
             if val not in (None, 0, "0"):
-                pairs.append((o["code"], val, numeric_value(val)))
+                pairs.append((o["code"], val, numeric_value(val), cell.fill))
         # 'departure' order = the order outbound rows already appear in the
         # source (chronological by departure time) - just leave it as-is.
         # 'count' order = re-sort by transfer count, largest first.
         if sort_by == "count":
             pairs.sort(key=lambda p: p[2], reverse=True)
-        f["pairs"] = [(dest, val) for dest, val, _ in pairs]
+        f["pairs"] = [(dest, val, fill) for dest, val, _, fill in pairs]
 
     # ---- write output ----
     out_wb = openpyxl.Workbook()
@@ -237,8 +239,9 @@ def generate_modified_matrix(
         c.number_format = "hh:mm"
 
         r = DATA_START_ROW
-        for dest, cnt in f["pairs"]:
-            out_ws.cell(row=r, column=dest_col, value=dest).font = normal
+        for dest, cnt, fill in f["pairs"]:
+            dest_cell = out_ws.cell(row=r, column=dest_col, value=dest)
+            dest_cell.font = normal
             cell = out_ws.cell(row=r, column=cnt_col, value=numeric_value(cnt))
             cell.font = normal
             if isinstance(cnt, str) and "*" in cnt:
@@ -246,6 +249,13 @@ def generate_modified_matrix(
                     f"Source cell read '{cnt}'; value shown is the product.",
                     "build_modified_matrix.py",
                 )
+            # Carry over the source cell's highlight color - it encodes
+            # something meaningful (e.g. a tight/urgent connection), so the
+            # reshaped sheet needs to keep showing it, on both cells of the
+            # pair so the whole row reads as highlighted.
+            if fill is not None and fill.fill_type is not None:
+                dest_cell.fill = copy(fill)
+                cell.fill = copy(fill)
             r += 1
 
         # Real formula total for THIS flight's own block only

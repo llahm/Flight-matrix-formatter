@@ -9,6 +9,7 @@
   --accent: #eea23b;
   --accent-soft: #eea23b26;
   --accent-cyan: #45c9c0;
+  --accent-cyan-soft: #45c9c026;
   --danger: #e2685a;
   --danger-soft: #e2685a1f;
   --success: #5bc98a;
@@ -188,15 +189,6 @@ body {
   margin-bottom: 8px;
 }
 
-.field-label-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.field-label-row .field-label { margin-bottom: 0; }
-
 .field-hint {
   margin: 8px 0 0;
   font-size: 12.5px;
@@ -287,19 +279,22 @@ body {
   color: var(--accent);
 }
 
+.chip--all {
+  font-family: var(--font-display);
+  font-weight: 500;
+  border-style: dashed;
+}
+
+.chip--all.is-active {
+  background: var(--accent-cyan-soft);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  border-style: solid;
+}
+
 .chip:focus-visible {
   outline: 2px solid var(--accent-cyan);
   outline-offset: 1px;
-}
-
-.text-btn {
-  background: none;
-  border: none;
-  color: var(--accent-cyan);
-  font-family: var(--font-display);
-  font-size: 12.5px;
-  cursor: pointer;
-  padding: 0;
 }
 
 /* ---------- checkbox ---------- */

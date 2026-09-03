@@ -22,7 +22,6 @@
   const staHint = document.getElementById("staHint");
 
   const outboundChips = document.getElementById("outboundChips");
-  const chipsClear = document.getElementById("chipsClear");
 
   const allBlocksCheck = document.getElementById("allBlocksCheck");
   const generateBtn = document.getElementById("generateBtn");
@@ -112,6 +111,25 @@
       outboundChips.appendChild(p);
       return;
     }
+
+    // "All" is its own chip so the include-everything state is always
+    // visible, not just the absence of a selection. It's active whenever
+    // no specific code is picked; clicking it clears any picks.
+    const allChip = document.createElement("button");
+    allChip.type = "button";
+    allChip.className = "chip chip--all is-active";
+    allChip.textContent = "All";
+    allChip.setAttribute("aria-pressed", "true");
+    allChip.addEventListener("click", () => {
+      activeOutbound.clear();
+      outboundChips.querySelectorAll(".chip").forEach((c) => {
+        const isAll = c === allChip;
+        c.classList.toggle("is-active", isAll);
+        c.setAttribute("aria-pressed", String(isAll));
+      });
+    });
+    outboundChips.appendChild(allChip);
+
     codes.forEach((code) => {
       const chip = document.createElement("button");
       chip.type = "button";
@@ -128,6 +146,11 @@
           chip.classList.add("is-active");
           chip.setAttribute("aria-pressed", "true");
         }
+        // Any specific pick turns "All" off; clearing the last pick turns
+        // it back on, since an empty set already means "include all".
+        const allActive = activeOutbound.size === 0;
+        allChip.classList.toggle("is-active", allActive);
+        allChip.setAttribute("aria-pressed", String(allActive));
       });
       outboundChips.appendChild(chip);
     });
@@ -237,14 +260,6 @@
         b.classList.toggle("is-active", active);
         b.setAttribute("aria-checked", String(active));
       });
-    });
-  });
-
-  chipsClear.addEventListener("click", () => {
-    activeOutbound = new Set();
-    outboundChips.querySelectorAll(".chip").forEach((c) => {
-      c.classList.remove("is-active");
-      c.setAttribute("aria-pressed", "false");
     });
   });
 
